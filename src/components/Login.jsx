@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { database, storage } from "../firebaseConfig";
-// import { getAuth } from "firebase/auth";
 import { collection, addDoc } from "firebase/firestore";
 import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import uniqid from "uniqid";
 function Login() {
-  // let auth = getAuth();
-
   const collectionRef = collection(database, "users");
   const [img, setImg] = useState({});
   const [url, setUrl] = useState(" ");
@@ -87,7 +84,6 @@ function Login() {
         <input
           type="password"
           name="password"
-          // onChange={(e) => setToData({ ...toData, password: e.target.value })}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Enter password"
           className="input"
@@ -115,7 +111,6 @@ function Login() {
         value="submit"
         className="btn  m-auto py-3  text-white login__button"
         onClick={handleSubmit}
-        // onClick={(e) => handleSubmit(e)}
       >
         REGISTER
       </button>

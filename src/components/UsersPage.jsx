@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import uniqid from "uniqid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import {
-  collection,
-  doc,
-  onSnapshot,
-  updateDoc,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, doc, updateDoc, query, where } from "firebase/firestore";
 import { database } from "../firebaseConfig";
-import Clock from "./Clock";
 function UsersPage({ logedInUser, id }) {
   const [showCard, setShowCard] = useState(false);
   const [task, setTask] = useState({ taskDes: "", title: "", done: false });
-  const [line, setLine] = useState({ show: false, id: null });
+
   const handleAdd = () => {
     setShowCard(true);
   };
@@ -27,10 +19,10 @@ function UsersPage({ logedInUser, id }) {
 
   const handleToAddTask = () => {
     /* makes query to user*/
-    const nameQuery = query(
-      collectionRef,
-      where("name", "==", logedInUser.name)
-    );
+    // const nameQuery = query(
+    //   collectionRef,
+    //   where("name", "==", logedInUser.name)
+    // );
 
     /* makes ref to user */
     const docRef = doc(database, "users", id);

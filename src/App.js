@@ -4,7 +4,7 @@ import Login from "./components/Login";
 import SignIn from "./components/SignIn";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UsersPage from "./components/UsersPage";
 function App() {
   const [logedInUser, setLogedInUser] = useState();
@@ -29,13 +29,10 @@ function App() {
               />
             }
           />
-          {/* {logedInUser && ( */}
           <Route
-            // path={`/${logedInUser.id}`}
             path="/user"
             element={<UsersPage logedInUser={logedInUser} id={id} />}
           />
-          {/* )} */}
         </Routes>
       </div>
     </Router>
