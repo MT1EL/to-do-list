@@ -81,15 +81,7 @@ function UsersPage({ logedInUser, id }) {
                       <input type="checkbox" />
 
                       <div className="p__container">
-                        <p
-                          className={
-                            index === line.id && line.show
-                              ? "taks__paragraph"
-                              : "taks__paragraph show"
-                          }
-                        >
-                          {task.taskDes}
-                        </p>
+                        <p className={"taks__paragraph"}>{task.taskDes}</p>
                       </div>
                     </div>
                     <FontAwesomeIcon
