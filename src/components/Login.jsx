@@ -4,12 +4,14 @@ import { database, storage } from "../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import uniqid from "uniqid";
+import { toast } from "react-hot-toast";
+
 function Login() {
   const collectionRef = collection(database, "users");
   const [img, setImg] = useState({});
   const [url, setUrl] = useState(" ");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+
   const [toData, setToData] = useState({
     email: "",
     password: "",
@@ -48,13 +50,11 @@ function Login() {
         id: uniqid(),
       })
         .then(() => {
-          alert("Data added");
+          toast.success("Account added");
         })
         .catch((err) => alert(err.message));
-      setError(null);
     } else {
-      setError("password do not match");
-      console.log("loading");
+      toast.error("password do not match");
     }
 
     handleInput();
@@ -103,7 +103,6 @@ function Login() {
           onChange={(e) => setImg(e.target.files[0])}
           placeholder="choose profile picture"
         />
-        {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
 
       <button

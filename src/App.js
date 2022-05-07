@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
 import UsersPage from "./components/UsersPage";
+import { Toaster } from "react-hot-toast";
 function App() {
   const [logedInUser, setLogedInUser] = useState();
   const [id, setId] = useState(null);
@@ -34,6 +35,7 @@ function App() {
             element={<UsersPage logedInUser={logedInUser} id={id} />}
           />
         </Routes>
+        <Toaster />
       </div>
     </Router>
   );

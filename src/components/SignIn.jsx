@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { database } from "../firebaseConfig";
-
+import { toast } from "react-hot-toast";
 function SignIn({ setLogedInUser, setId }) {
   const navigate = useNavigate();
 
   const [user, setUser] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
 
   const collectionRef = collection(database, "users");
 
@@ -16,16 +15,16 @@ function SignIn({ setLogedInUser, setId }) {
   const handleSubmit = () => {
     onSnapshot(nameQuery, (data) => {
       if (data.docs.length < 1) {
-        setError("email or password is wrong");
+        toast.error("email or password is wrong");
       }
       data.docs.map((item) => {
         if (item.data().password === user.password) {
           setLogedInUser(item.data());
           setId(item.id);
-
+          toast.success("you're successfully loged in");
           navigate("/user");
         } else {
-          setError("email or password is wrong");
+          toast.error("email or password is wrong");
         }
       });
     });
@@ -52,7 +51,6 @@ function SignIn({ setLogedInUser, setId }) {
           className="input"
           required
         />
-        {error && <h3 style={{ color: "red" }}>{error}</h3>}
       </form>
 
       <button
