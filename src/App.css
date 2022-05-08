@@ -183,6 +183,9 @@ form {
   margin-top: 3em;
   margin-bottom: 1.5em;
   text-align: center;
+  position: relative;
+  z-index: 4;
+  margin-top: 10em;
 }
 
 .addToDO button {
@@ -431,7 +434,7 @@ p {
   max-width: fit-content;
   position: absolute;
   top: 2em;
-  z-index: 5;
+  z-index: 1;
 }
 .iconAdd {
   display: flex;
@@ -445,4 +448,22 @@ p {
 }
 .iconAdd:hover {
   opacity: 0.6;
+}
+
+.loaderContainer {
+  width: 150px;
+  height: 10px;
+  position: relative;
+  background-color: black;
+  border-radius: 10px;
+  margin-top: 10px;
+  margin-inline: auto;
+  position: relative;
+}
+.loader {
+  position: absolute;
+  left: 0;
+  height: 9.5px;
+  background: linear-gradient(yellow, red);
+  border-radius: 10px;
 }

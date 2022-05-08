@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import uniqid from "uniqid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -10,8 +10,8 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
   const [showCard, setShowCard] = useState(false);
   const [task, setTask] = useState({ taskDes: "", title: "", done: false });
   const [img, setImg] = useState({});
-  const [url, setUrl] = useState(logedInUser.image);
-  console.log(logedInUser);
+  const [url, setUrl] = useState("");
+  const [loader, setLoader] = useState(null);
   const handleAdd = () => {
     setShowCard(true);
   };
@@ -23,7 +23,6 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
     });
     setLogedInUser({ ...logedInUser, toDos: [...logedInUser.toDos, task] });
     setShowCard(false);
-    handleSubmit();
   };
 
   const deleteItem = (index) => {
@@ -42,7 +41,7 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
   }
 
   function handleSubmit() {
-    const toRef = ref(storage, `images`);
+    const toRef = ref(storage, `images${logedInUser.name}`);
 
     const uploadTask = uploadBytesResumable(toRef, img);
     uploadTask.on(
@@ -51,22 +50,24 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         console.log("Upload is " + progress + "% done");
+        setLoader(progress);
       },
       (error) => {
         console.log(error);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+          const docRef = doc(database, "users", id);
+
+          setLogedInUser({ ...logedInUser, image: url });
+
+          updateDoc(docRef, {
+            image: url,
+          });
           setUrl(downloadUrl);
         });
       }
     );
-    const docRef = doc(database, "users", id);
-    setLogedInUser({ ...logedInUser, image: url });
-    url &&
-      updateDoc(docRef, {
-        image: url,
-      });
   }
 
   return (
@@ -76,8 +77,8 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
         <div className={showCard ? "profile__absolute" : "userImage"}>
           <img
             src={
-              url
-                ? url
+              logedInUser.image
+                ? logedInUser.image
                 : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg"
             }
             alt=""
@@ -137,6 +138,17 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
               onChange={(e) => setImg(e.target.files[0])}
               placeholder="choose profile picture"
             />
+            {loader && (
+              <div>
+                <div className="loaderContainer">
+                  <span
+                    className="loader"
+                    style={{ width: `${loader}%` }}
+                  ></span>
+                </div>
+                <p>{loader}%</p>
+              </div>
+            )}
             <button onClick={() => handleSubmit()} className="mt-2">
               {" "}
               add
