@@ -1,35 +1,33 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { database } from "../firebaseConfig";
 import { toast } from "react-hot-toast";
 function SignIn({ setLogedInUser, setId }) {
   const navigate = useNavigate();
-
   const [user, setUser] = useState({ email: "", password: "" });
-
   const collectionRef = collection(database, "users");
 
-  const nameQuery = query(collectionRef, where("email", "==", user.email));
+  const emailQuery = query(collectionRef, where("email", "==", user.email));
 
   const handleSubmit = () => {
-    onSnapshot(nameQuery, (data) => {
-      if (data.docs.length < 1) {
-        toast.error("email or password is wrong");
+    getDocs(emailQuery, collectionRef).then((res) => {
+      if (res.docs.length < 1) {
+        toast.error("user not found");
+      } else {
+        res.docs.map((item) => {
+          if (item.data().password === user.password) {
+            setLogedInUser(item.data());
+            setId(item.id);
+            toast.success("successfully loged in");
+            navigate("/user");
+          } else {
+            toast.error("email or password is incorrect");
+          }
+        });
       }
-      data.docs.map((item) => {
-        if (item.data().password === user.password) {
-          setLogedInUser(item.data());
-          setId(item.id);
-          toast.success("you're successfully loged in");
-          navigate("/user");
-        } else {
-          toast.error("email or password is wrong");
-        }
-      });
     });
   };
-
   return (
     <section className="login">
       <h3>Welcome Onboard!</h3>
@@ -55,7 +53,7 @@ function SignIn({ setLogedInUser, setId }) {
 
       <button
         className="btn  m-auto py-3  text-white login__button"
-        onClick={handleSubmit}
+        onClick={() => handleSubmit("login")}
       >
         LOG IN
       </button>

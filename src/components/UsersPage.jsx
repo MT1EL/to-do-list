@@ -2,36 +2,28 @@ import React, { useState } from "react";
 import uniqid from "uniqid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { doc, updateDoc } from "firebase/firestore";
+import { database, storage } from "../firebaseConfig";
 
-import { collection, doc, updateDoc, query, where } from "firebase/firestore";
-import { database } from "../firebaseConfig";
-function UsersPage({ logedInUser, id }) {
+import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
+function UsersPage({ logedInUser, setLogedInUser, id }) {
   const [showCard, setShowCard] = useState(false);
   const [task, setTask] = useState({ taskDes: "", title: "", done: false });
-
+  const [img, setImg] = useState({});
+  const [url, setUrl] = useState(logedInUser.image);
+  console.log(logedInUser);
   const handleAdd = () => {
     setShowCard(true);
   };
-  // const [id, setid] = useState("");
-  const collectionRef = collection(database, "users");
-
-  /* adds task to storage */
 
   const handleToAddTask = () => {
-    /* makes query to user*/
-    // const nameQuery = query(
-    //   collectionRef,
-    //   where("name", "==", logedInUser.name)
-    // );
-
-    /* makes ref to user */
     const docRef = doc(database, "users", id);
-    /* gets user and update toDo list */
     updateDoc(docRef, {
       toDos: [...logedInUser.toDos, task],
     });
-    /* closes card wich pop's up when u are adding task */
+    setLogedInUser({ ...logedInUser, toDos: [...logedInUser.toDos, task] });
     setShowCard(false);
+    handleSubmit();
   };
 
   const deleteItem = (index) => {
@@ -42,24 +34,64 @@ function UsersPage({ logedInUser, id }) {
     updateDoc(docRef, {
       toDos: [...logedInUser.toDos],
     });
+    setLogedInUser({ ...logedInUser, toDos: [...logedInUser.toDos] });
   };
 
   if (!logedInUser) {
     return <h1>Loading...</h1>;
   }
+
+  function handleSubmit() {
+    const toRef = ref(storage, `images`);
+
+    const uploadTask = uploadBytesResumable(toRef, img);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+      },
+      (error) => {
+        console.log(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+          setUrl(downloadUrl);
+        });
+      }
+    );
+    const docRef = doc(database, "users", id);
+    setLogedInUser({ ...logedInUser, image: url });
+    url &&
+      updateDoc(docRef, {
+        image: url,
+      });
+  }
+
   return (
     <section className="userPage">
       <div className="user__header">
         <h3>Welcome, {logedInUser.name}</h3>
-        <img src={logedInUser.image} alt="" className="profile__picture" />
+        <div className={showCard ? "profile__absolute" : "userImage"}>
+          <img
+            src={
+              url
+                ? url
+                : "https://t3.ftcdn.net/jpg/03/46/83/96/360_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg"
+            }
+            alt=""
+            className="profile__picture"
+          />
+        </div>
       </div>
       {/* <Clock /> */}
 
       <div className="taks__container">
-        <h3>Tasks List</h3>
+        <h3 className="mx-1">Tasks List</h3>
         <div className="tasks">
           <div className="add__tastks">
-            <h5>Tasks List</h5>
+            <h5 className="mx-2">Tasks List</h5>
             <FontAwesomeIcon
               icon={faPlusCircle}
               className="addTasks"
@@ -67,7 +99,7 @@ function UsersPage({ logedInUser, id }) {
             />
           </div>
           {logedInUser.toDos < 1 ? (
-            <h4>You Don't have any, tasks let's add some</h4>
+            <h4 className="mx-2">You Don't have any, tasks let's add some</h4>
           ) : (
             logedInUser.toDos.map((task, index) => {
               return (
@@ -98,6 +130,18 @@ function UsersPage({ logedInUser, id }) {
       </div>
       {showCard && (
         <div className="addToDO">
+          <div className="addProfileImage">
+            <h5>Choose profile picture</h5>
+            <input
+              type="file"
+              onChange={(e) => setImg(e.target.files[0])}
+              placeholder="choose profile picture"
+            />
+            <button onClick={() => handleSubmit()} className="mt-2">
+              {" "}
+              add
+            </button>
+          </div>
           <input
             type="text"
             placeholder="add Title"
@@ -111,7 +155,7 @@ function UsersPage({ logedInUser, id }) {
             onChange={(e) => setTask({ ...task, taskDes: e.target.value })}
           />
 
-          <button onClick={handleToAddTask}>Add task</button>
+          <button onClick={() => handleToAddTask("add")}>Add task</button>
         </div>
       )}
     </section>

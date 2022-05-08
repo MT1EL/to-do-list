@@ -32,9 +32,16 @@ function App() {
           />
           <Route
             path="/user"
-            element={<UsersPage logedInUser={logedInUser} id={id} />}
+            element={
+              <UsersPage
+                setLogedInUser={setLogedInUser}
+                logedInUser={logedInUser}
+                id={id}
+              />
+            }
           />
         </Routes>
+
         <Toaster />
       </div>
     </Router>

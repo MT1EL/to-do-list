@@ -19,6 +19,14 @@ function Home() {
             Get Started
           </button>
         </Link>
+        <Link to="SignIn">
+          <button
+            type="button"
+            className="btn my-2 m-auto py-3  text-white main__button"
+          >
+            LogIn
+          </button>
+        </Link>
       </div>
     </section>
   );

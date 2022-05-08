@@ -1,107 +1,115 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { database, storage } from "../firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
-import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
+import { Link, useNavigate } from "react-router-dom";
+import { database } from "../firebaseConfig";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import uniqid from "uniqid";
 import { toast } from "react-hot-toast";
-
+import { useFormik } from "formik";
+import * as yup from "yup";
 function Login() {
+  const navigate = useNavigate();
   const collectionRef = collection(database, "users");
-  const [img, setImg] = useState({});
-  const [url, setUrl] = useState(" ");
   const [password, setPassword] = useState("");
 
-  const [toData, setToData] = useState({
-    email: "",
-    password: "",
-    name: "",
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+    validationSchema: yup.object({
+      name: yup.string().required("Required"),
+      email: yup.string("").email("Invalid email adress").required("required"),
+      password: yup.string("").min(8, "Must be 8characters or more"),
+    }),
+    onSubmit: (values) => {
+      handleSubmit();
+    },
   });
-  const handleInput = () => {
-    const toRef = ref(storage, `images/${toData.name}`);
 
-    const uploadTask = uploadBytesResumable(toRef, img);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log("Upload is " + progress + "% done");
-      },
-      (error) => {
-        console.log(error);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
-          setUrl(downloadUrl);
-        });
-      }
-    );
-  };
   const handleSubmit = () => {
-    if (url.length && password === toData.password) {
-      addDoc(collectionRef, {
-        email: toData.email,
-        password: toData.password,
-        name: toData.name,
-        image: url && url,
-        toDos: [],
-        id: uniqid(),
-      })
-        .then(() => {
-          toast.success("Account added");
-        })
-        .catch((err) => alert(err.message));
-    } else {
-      toast.error("password do not match");
-    }
+    const emailQuery = query(
+      collectionRef,
+      where("email", "==", formik.values.email)
+    );
 
-    handleInput();
+    getDocs(emailQuery, collectionRef).then((res) => {
+      if (res.docs.length === 1) {
+        toast.error("user already exists");
+      } else if (res.docs.length === 0) {
+        if (password === formik.values.password) {
+          addDoc(collectionRef, {
+            email: formik.values.email,
+            password: formik.values.password,
+            name: formik.values.name,
+            image: "",
+            toDos: [],
+            id: uniqid(),
+          })
+            .then(() => {
+              toast.success("Account added");
+              navigate("/");
+            })
+            .catch((err) => alert(err.message));
+        } else {
+          toast.error("password do not match");
+        }
+      }
+    });
   };
 
   return (
     <section className="login">
       <h3>Welcome Onboard!</h3>
       <p>Let's help you meet up your tasks</p>
-      <form action="/">
+      <form>
         <input
           type="text"
           placeholder="Enter your full name"
           className="input"
           name="name"
-          onChange={(e) => setToData({ ...toData, name: e.target.value })}
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           required
         />
+        {formik.touched.name && formik.errors.name && (
+          <p style={{ color: "red" }}>{formik.errors.name}</p>
+        )}
         <input
           type="email"
           name="email"
-          onChange={(e) => setToData({ ...toData, email: e.target.value })}
+          onChange={formik.handleChange}
           placeholder="Enter your email"
           className="input"
+          value={formik.values.email}
+          onBlur={formik.handleBlur}
           required
         />
+        {formik.touched.email && formik.errors.email && (
+          <p style={{ color: "red" }}>{formik.errors.email}</p>
+        )}
+
         <input
           type="password"
           name="password"
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={formik.handleChange}
+          value={formik.values.password}
+          onBlur={formik.handleBlur}
           placeholder="Enter password"
           className="input"
           required
         />
+        {formik.touched.password && formik.errors.password && (
+          <p style={{ color: "red" }}>{formik.errors.password}</p>
+        )}
         <input
           type="password"
           placeholder="Confirm Password"
           className="input"
           name="confirm passowrd"
-          onChange={(e) => setToData({ ...toData, password: e.target.value })}
+          onChange={(e) => setPassword(e.target.value)}
           required
-        />
-        <h5 style={{ alignSelf: "flex-start" }}>Choose profile picture</h5>
-        <input
-          type="file"
-          onChange={(e) => setImg(e.target.files[0])}
-          placeholder="choose profile picture"
         />
       </form>
 
@@ -109,7 +117,7 @@ function Login() {
         type="submit"
         value="submit"
         className="btn  m-auto py-3  text-white login__button"
-        onClick={handleSubmit}
+        onClick={formik.handleSubmit}
       >
         REGISTER
       </button>
