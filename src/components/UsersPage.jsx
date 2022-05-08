@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import uniqid from "uniqid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { doc, updateDoc } from "firebase/firestore";
 import { database, storage } from "../firebaseConfig";
-
+import { useNavigate } from "react-router-dom";
 import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 function UsersPage({ logedInUser, setLogedInUser, id }) {
+  const navigate = useNavigate();
   const [showCard, setShowCard] = useState(false);
   const [task, setTask] = useState({ taskDes: "", title: "", done: false });
   const [img, setImg] = useState({});
@@ -19,9 +20,9 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
   const handleToAddTask = () => {
     const docRef = doc(database, "users", id);
     updateDoc(docRef, {
-      toDos: [...logedInUser.toDos, task],
+      toDos: [task, ...logedInUser.toDos],
     });
-    setLogedInUser({ ...logedInUser, toDos: [...logedInUser.toDos, task] });
+    setLogedInUser({ ...logedInUser, toDos: [task, ...logedInUser.toDos] });
     setShowCard(false);
   };
 
@@ -70,10 +71,24 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
     );
   }
 
+  const handleLogOut = () => {
+    setLogedInUser({});
+    navigate("/");
+  };
+
   return (
     <section className="userPage">
       <div className="user__header">
-        <h3>Welcome, {logedInUser.name}</h3>
+        <div>
+          <h3>Welcome, {logedInUser.name}</h3>
+          <button
+            type="button"
+            className="button btn-primary"
+            onClick={() => handleLogOut()}
+          >
+            Log Out
+          </button>
+        </div>
         <div className={showCard ? "profile__absolute" : "userImage"}>
           <img
             src={
@@ -111,7 +126,7 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
                     style={{ width: "100%" }}
                   >
                     <div className="d-flex align-items-center w-50 ">
-                      <input type="checkbox" />
+                      <input type="checkbox" className="checkbox" />
 
                       <div className="p__container">
                         <p className={"taks__paragraph"}>{task.taskDes}</p>

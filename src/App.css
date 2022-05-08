@@ -187,7 +187,6 @@ form {
   z-index: 4;
   margin-top: 10em;
 }
-
 .addToDO button {
   padding: 0.7em 3em;
   background-color: #50c2c9;
@@ -466,4 +465,7 @@ p {
   height: 9.5px;
   background: linear-gradient(yellow, red);
   border-radius: 10px;
+}
+.checkbox:checked {
+  padding: 1em;
 }
