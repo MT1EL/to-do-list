@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { database, auth } from "../firebaseConfig";
 import { toast } from "react-hot-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
-function SignIn({ setLogedInUser, setId, logedInUser }) {
+function SignIn({ setLogedInUser, setId }) {
   const navigate = useNavigate();
   const [user, setUser] = useState({ email: "", password: "" });
   const collectionRef = collection(database, "users");

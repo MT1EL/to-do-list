@@ -57,8 +57,8 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
       (error) => {
         console.log(error);
       },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+      async () => {
+        await getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
           const docRef = doc(database, "users", id);
 
           setLogedInUser({ ...logedInUser, image: url });
