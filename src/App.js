@@ -10,7 +10,6 @@ import { Toaster } from "react-hot-toast";
 import { onAuthStateChanged } from "firebase/auth";
 import { database, auth } from "./firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { toast } from "react-hot-toast";
 
 function App() {
   const [logedInUser, setLogedInUser] = useState();
