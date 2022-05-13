@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { database } from "../firebaseConfig";
+import { database, auth } from "../firebaseConfig";
 import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+// import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
 import uniqid from "uniqid";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+
 function Login() {
   const navigate = useNavigate();
   const collectionRef = collection(database, "users");
@@ -45,17 +49,22 @@ function Login() {
             image: "",
             toDos: [],
             id: uniqid(),
-          })
-            .then(() => {
-              toast.success("Account added");
-              navigate("/");
-            })
-            .catch((err) => alert(err.message));
+          }).catch((err) => alert(err.message));
         } else {
           toast.error("password do not match");
         }
       }
     });
+    createUserWithEmailAndPassword(
+      auth,
+      formik.values.email,
+      formik.values.password
+    )
+      .then((user) => {
+        toast.success("Account added");
+        navigate("/");
+      })
+      .catch((error) => console.log(error));
   };
 
   return (

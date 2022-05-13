@@ -6,7 +6,8 @@ import { doc, updateDoc } from "firebase/firestore";
 import { database, storage } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
-function UsersPage({ logedInUser, setLogedInUser, id }) {
+import toast from "react-hot-toast";
+function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
   const navigate = useNavigate();
   const [showCard, setShowCard] = useState(false);
   const [task, setTask] = useState({ taskDes: "", title: "", done: false });
@@ -73,7 +74,9 @@ function UsersPage({ logedInUser, setLogedInUser, id }) {
 
   const handleLogOut = () => {
     setLogedInUser({});
+    setLogedInUserEmail(null);
     navigate("/");
+    toast.success("successfuly loged out");
   };
 
   return (

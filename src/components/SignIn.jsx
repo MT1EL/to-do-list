@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { database } from "../firebaseConfig";
+import { database, auth } from "../firebaseConfig";
 import { toast } from "react-hot-toast";
-function SignIn({ setLogedInUser, setId }) {
+import { signInWithEmailAndPassword } from "firebase/auth";
+
+function SignIn({ setLogedInUser, setId, logedInUser }) {
   const navigate = useNavigate();
   const [user, setUser] = useState({ email: "", password: "" });
   const collectionRef = collection(database, "users");
@@ -20,6 +22,7 @@ function SignIn({ setLogedInUser, setId }) {
             setLogedInUser(item.data());
             setId(item.id);
             toast.success("successfully loged in");
+
             navigate("/user");
           } else {
             toast.error("email or password is incorrect");
@@ -27,7 +30,14 @@ function SignIn({ setLogedInUser, setId }) {
         });
       }
     });
+
+    signInWithEmailAndPassword(auth, user.email, user.password)
+      .then((user) => {
+        console.log(user);
+      })
+      .catch((error) => console.log(error));
   };
+
   return (
     <section className="login">
       <h3>Welcome Onboard!</h3>
