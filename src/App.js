@@ -17,29 +17,27 @@ function App() {
   const [id, setId] = useState(null);
   const collectionRef = collection(database, "users");
 
-  const emailQuery = query(
-    collectionRef,
-    where("email", "==", logedinUserEmail)
-  );
-
-  getDocs(emailQuery, collectionRef).then((res) => {
-    res.docs.map((item) => {
-      setLogedInUser(item.data());
-      setId(item.id);
-    });
-  });
-
   useEffect(() => {
     onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         setLogedInUserEmail(authUser.email);
-        console.log(authUser);
       } else {
         //user has logged out
         return;
       }
     });
-  }, []);
+    const emailQuery = query(
+      collectionRef,
+      where("email", "==", logedinUserEmail)
+    );
+
+    getDocs(emailQuery, collectionRef).then((res) => {
+      res.docs.map((item) => {
+        setLogedInUser(item.data());
+        setId(item.id);
+      });
+    });
+  }, [logedinUserEmail]);
 
   return (
     <Router>

@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import uniqid from "uniqid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  faPlusCircle,
+  faTrash,
+  faCheckCircle,
+  faCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { database, storage } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
@@ -14,6 +19,7 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
   const [img, setImg] = useState({});
   const [url, setUrl] = useState("");
   const [loader, setLoader] = useState(null);
+  const [arr, setArr] = useState([]);
   const handleAdd = () => {
     setShowCard(true);
   };
@@ -22,8 +28,13 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
     const docRef = doc(database, "users", id);
     updateDoc(docRef, {
       toDos: [task, ...logedInUser.toDos],
+      check: [false, ...logedInUser.check],
     });
-    setLogedInUser({ ...logedInUser, toDos: [task, ...logedInUser.toDos] });
+    setLogedInUser({
+      ...logedInUser,
+      toDos: [task, ...logedInUser.toDos],
+      check: [false, ...logedInUser.check],
+    });
     setShowCard(false);
   };
 
@@ -31,9 +42,10 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
     const docRef = doc(database, "users", id);
 
     logedInUser.toDos.splice(index, 1);
-
+    logedInUser.check.splice(index, 1);
     updateDoc(docRef, {
       toDos: [...logedInUser.toDos],
+      check: [...logedInUser.check],
     });
     setLogedInUser({ ...logedInUser, toDos: [...logedInUser.toDos] });
   };
@@ -51,7 +63,6 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log("Upload is " + progress + "% done");
         setLoader(progress);
       },
       (error) => {
@@ -77,6 +88,22 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
     setLogedInUserEmail(null);
     navigate("/");
     toast.success("successfuly loged out");
+  };
+
+  const updateChecked = (boolean, index) => {
+    const docRef = doc(database, "users", id);
+
+    const tarr = logedInUser.check;
+    tarr[index] = !tarr[index];
+
+    setLogedInUser({
+      ...logedInUser,
+      user: tarr,
+    });
+
+    updateDoc(docRef, {
+      check: tarr,
+    });
   };
 
   return (
@@ -129,10 +156,28 @@ function UsersPage({ logedInUser, setLogedInUser, id, setLogedInUserEmail }) {
                     style={{ width: "100%" }}
                   >
                     <div className="d-flex align-items-center w-50 ">
-                      <input type="checkbox" className="checkbox" />
-
+                      {logedInUser.check[index] ? (
+                        <FontAwesomeIcon
+                          icon={faCheckCircle}
+                          onClick={() => updateChecked(true, index)}
+                        />
+                      ) : (
+                        <FontAwesomeIcon
+                          icon={faCircle}
+                          onClick={() => updateChecked(false, index)}
+                        />
+                      )}
+                      {/* <input type="checkbox" className="checkbox" /> */}
                       <div className="p__container">
-                        <p className={"taks__paragraph"}>{task.taskDes}</p>
+                        <p
+                          className={
+                            logedInUser.check[index]
+                              ? "taks__paragraph line__through"
+                              : "taks__paragraph"
+                          }
+                        >
+                          {task.taskDes}
+                        </p>
                       </div>
                     </div>
                     <FontAwesomeIcon

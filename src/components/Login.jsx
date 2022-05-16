@@ -48,6 +48,7 @@ function Login() {
             name: formik.values.name,
             image: "",
             toDos: [],
+            check: [],
             id: uniqid(),
           }).catch((err) => alert(err.message));
         } else {

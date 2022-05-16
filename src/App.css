@@ -229,12 +229,13 @@ form {
 }
 .taks__paragraph {
   width: min(200px, 25vw);
-
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-
   margin-block: auto;
+}
+.line__through {
+  text-decoration: line-through;
 }
 .show {
   white-space: normal !important;
